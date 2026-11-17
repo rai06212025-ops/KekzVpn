@@ -109,4 +109,606 @@
         .log-content {
             width: 100%; min-height: 80px; max-height: 110px; overflow-y: auto;
             background: var(--bg-deep); border: 1px solid var(--border); border-radius: 8px; padding: 10px;
-            font-family: 'JetBrains Mono', monosp
+            font-family: 'JetBrains Mono', monospace; font-size: 10px; line-height: 1.5; color: var(--text-secondary);
+        }
+        .log-line {margin-bottom: 2px; word-break: break-all;}
+        .log-time {color: var(--accent); margin-right: 6px;}
+        .log-success {color: var(--success);}
+        .log-error {color: var(--error);}
+        .log-warning {color: var(--warning);}
+
+        .monitor-box {
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px;
+        }
+        .monitor-header {display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;}
+        .monitor-title {font-size: 13px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px;}
+        .monitor-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;
+        }
+        .monitor-item {
+            padding: 10px; border-radius: 8px; background: var(--bg-deep); border: 1px solid var(--border);
+        }
+        .monitor-item-label {font-size: 9px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 3px;}
+        .monitor-item-value {font-size: 12px; font-weight: 600; color: var(--accent); word-break: break-all;}
+        .monitor-item-value.success {color: var(--success);}
+        .monitor-item-value.error {color: var(--error);}
+        .monitor-item-value.warning {color: var(--warning);}
+        
+        .mini-graph-wrapper {
+            width: 100%; height: 60px; border-radius: 8px; overflow: hidden;
+            background: var(--bg-deep); border: 1px solid var(--border);
+        }
+        .mini-graph-canvas {width: 100%; height: 100%; display: block;}
+        .graph-note {font-size: 9px; color: var(--text-secondary); text-align: center; margin-top: 5px; letter-spacing: 0.5px;}
+
+        .section {background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px;}
+        .section-header {display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;}
+        .section-title {font-size: 13px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px;}
+        
+        .select-btn {
+            width: 100%; padding: 12px; background: var(--bg-deep); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--accent); font-size: 13px; font-weight: 600;
+            cursor: pointer; text-align: left; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;
+        }
+        .select-btn:hover {border-color: var(--accent); background: var(--surface-hover);}
+        .selected-value {margin-top: 6px; font-size: 11px; color: var(--success); font-weight: 500; padding-left: 2px;}
+
+        .btn-group {display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px;}
+        .option-btn {
+            flex: 1; min-width: 110px; padding: 10px; background: var(--bg-deep); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; text-align: center;
+        }
+        .option-btn.active {border-color: var(--accent); background: rgba(56, 189, 248, 0.1); color: var(--accent); font-weight: 600;}
+        .option-btn:hover {border-color: var(--border-glow);}
+
+        .config-box {position: relative; margin-top: 6px;}
+        .config-text {
+            width: 100%; min-height: 90px; padding: 14px; padding-top: 36px;
+            background: var(--bg-deep); border: 1px solid var(--border); border-radius: 8px;
+            color: var(--success); font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.4;
+            resize: none; outline: none;
+        }
+        .copy-btn {
+            position: absolute; top: 8px; right: 8px; padding: 5px 10px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: 6px; color: var(--accent);
+            font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+        }
+        .copy-btn:hover {background: var(--surface-hover); border-color: var(--accent);}
+
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(8, 12, 20, 0.95);
+            backdrop-filter: blur(8px); z-index: 99999; display: none; flex-direction: column; padding: 20px 16px;
+        }
+        .modal.show {display: flex;}
+        .modal-header-title {font-size: 15px; font-weight: 700; color: var(--accent); margin-bottom: 12px;}
+        .modal-list {flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;}
+        .modal-item {
+            padding: 12px 14px; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.2s; color: var(--text);
+        }
+        .modal-item:hover {border-color: var(--accent); background: var(--surface-hover);}
+        .modal-close {
+            padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+            color: var(--accent); cursor: pointer; text-align: center; margin-top: 12px; font-weight: 700; font-size: 13px;
+        }
+
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: var(--bg-deep); z-index: 999999; transition: opacity 0.4s ease;
+        }
+        #loading-screen.hidden {opacity: 0; pointer-events: none;}
+        .load-text {font-size: 20px; font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px;}
+        .load-sub {font-size: 12px; color: var(--text-secondary); letter-spacing: 1px;}
+        .loader-spinner {width: 38px; height: 38px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 16px 0;}
+        @keyframes spin {to {transform: rotate(360deg);}}
+    </style>
+</head>
+<body>
+
+<div id="loading-screen">
+    <div class="load-text">KEKEVPN PANEL</div>
+    <div class="loader-spinner"></div>
+    <div class="load-sub">INITIALIZING SYSTEM ...</div>
+</div>
+
+<div class="container" id="main-content" style="display:none;">
+    
+    <div class="panel-header">
+        <h1 class="panel-title">KEKEVPN PANEL</h1>
+        <div class="panel-subtitle">SECURE MULTI-PROTOCOL TUNNEL</div>
+    </div>
+
+    <div class="vpn-status-card" id="main-status-card">
+        <div class="status-indicator" id="main-status-icon">⟳</div>
+        <div class="status-text" id="main-status-text">KUMOKUHA NG IMPORMASYON...</div>
+        <div class="status-subtext" id="main-status-desc">KEKEVPN EDITION • LIBRENG INTERNET</div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-box">
+            <div class="info-label">HOST / ADDRESS</div>
+            <div class="info-value" id="info-host">---</div>
+        </div>
+        <div class="info-box">
+            <div class="info-label">SNI / SERVER NAME</div>
+            <div class="info-value" id="info-sni">---</div>
+        </div>
+        <div class="info-box">
+            <div class="info-label">PROTOCOL</div>
+            <div class="info-value" id="info-proto">VLESS</div>
+        </div>
+        <div class="info-box">
+            <div class="info-label">TRANSPORT</div>
+            <div class="info-value" id="info-transport">WebSocket</div>
+        </div>
+    </div>
+
+    <!-- SYSTEM LOG SECTION -->
+    <div class="system-log-box">
+        <div class="log-header">
+            <div class="log-title">📋 SYSTEM LOG</div>
+            <div class="log-clear" id="clear-log">DELETE ALL LOG</div>
+        </div>
+        <div class="log-content" id="system-log-area"></div>
+    </div>
+
+    <div class="monitor-box">
+        <div class="monitor-header">
+            <div class="monitor-title">📊 REAL-TIME SERVER MONITOR</div>
+        </div>
+
+        <div class="monitor-grid">
+            <div class="monitor-item">
+                <div class="monitor-item-label">YOUR IP ADDRESS</div>
+                <div class="monitor-item-value" id="user-ip">---</div>
+            </div>
+            <div class="monitor-item">
+                <div class="monitor-item-label">YOUR COUNTRY</div>
+                <div class="monitor-item-value" id="user-country">---</div>
+            </div>
+            <div class="monitor-item">
+                <div class="monitor-item-label">YOUR CITY</div>
+                <div class="monitor-item-value" id="user-city">---</div>
+            </div>
+            <div class="monitor-item">
+                <div class="monitor-item-label">SERVER STATUS</div>
+                <div class="monitor-item-value" id="server-status">---</div>
+            </div>
+            <div class="monitor-item">
+                <div class="monitor-item-label">PING / LATENCY</div>
+                <div class="monitor-item-value" id="ping-value">---</div>
+            </div>
+            <div class="monitor-item">
+                <div class="monitor-item-label">SERVER UPTIME</div>
+                <div class="monitor-item-value success" id="server-uptime">---</div>
+            </div>
+        </div>
+
+        <div class="mini-graph-wrapper">
+            <canvas id="mini-ping-graph" class="mini-graph-canvas"></canvas>
+        </div>
+        <div class="graph-note">📈 KEKEVPN TUNNEL MONITOR</div>
+    </div>
+
+    <div class="section">
+        <div class="section-header"><div class="section-title">🔌 BUG HOST / ADDRESS</div></div>
+        <button class="select-btn" id="address-btn"><span id="address-btn-text">Pumili ng Address</span> ▾</button>
+        <div class="selected-value" id="address-selected">Napili: Default Host</div>
+    </div>
+
+    <div class="section">
+        <div class="section-header"><div class="section-title">🛡️ SNI / SERVER NAME</div></div>
+        <button class="select-btn" id="sni-btn"><span id="sni-btn-text">Pumili ng SNI</span> ▾</button>
+        <div class="selected-value" id="sni-selected">Napili: Default SNI</div>
+    </div>
+
+    <div class="section">
+        <div class="section-header"><div class="section-title">🔐 URI NG PROTOCOL</div></div>
+        <div class="btn-group" id="proto-buttons"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header"><div class="section-title">📶 URI NG KONEKSYON (TRANSPORT)</div></div>
+        <div class="btn-group" id="trans-buttons"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header"><div class="section-title">📋 GENERATED CONFIG</div></div>
+        <div class="config-box">
+            <textarea class="config-text" id="config-display" readonly>---</textarea>
+            <button class="copy-btn" id="copy-btn">COPY</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="address-modal">
+    <div class="modal-header-title">🔌 PUMILI NG ADDRESS (TIG-LILIMA)</div>
+    <div class="modal-list" id="address-list"></div>
+    <div class="modal-close" id="address-close">✕ SARINHAN</div>
+</div>
+
+<div class="modal" id="sni-modal">
+    <div class="modal-header-title">🛡️ PUMILI NG SNI (TIG-LILIMA)</div>
+    <div class="modal-list" id="sni-list"></div>
+    <div class="modal-close" id="sni-close">✕ SARINHAN</div>
+</div>
+
+<script>
+(function() {
+    const UUID = '00000000-0000-0000-0000-kekevpn00000';
+    const SS_METHOD = 'aes-256-gcm';
+    const SS_PASSWORD = 'kekevpn';
+    let currentHost = window.location.hostname || '127.0.0.1';
+    
+    const PROTOCOLS = ['vless', 'trojan', 'vmess', 'shadowsocks'];
+    const PROTOCOL_LABELS = { vless:'VLESS', trojan:'Trojan', vmess:'VMess', shadowsocks:'Shadowsocks' };
+    
+    const TRANSPORTS = ['ws', 'httpupgrade'];
+    const TRANSPORT_LABELS = { ws:'WebSocket', httpupgrade:'HTTP Upgrade' };
+
+    const PATHS = { 
+        vless: { ws: '/vless-kekevpn', httpupgrade: '/vless-kekevpn-hu' }, 
+        trojan: { ws: '/kekevpn', httpupgrade: '/kekevpn-hu' }, 
+        vmess: { ws: '/vmess-kekevpn', httpupgrade: '/vmess-kekevpn-hu' }, 
+        shadowsocks: { ws: '/ss-kekevpn', httpupgrade: '/ss-kekevpn-hu' }
+    };
+
+    let selectedProtocol = 'vless';
+    let selectedTransport = 'ws';
+    let selectedAddress = currentHost;
+    let selectedSNI = currentHost;
+
+    // ✅ TIG-LILIMA NA LANG NA ADDRESS LIST
+    let addressList = [
+        currentHost,
+        'firebase.googleapis.com',
+        'google.com',
+        'run.googleapis.com',
+        'youtube.com'
+    ];
+
+    // ✅ TIG-LILIMA NA LANG NA SNI LIST
+    let sniList = [
+        currentHost,
+        'fcmtoken.googleapis.com',
+        'api.paymaya.com',
+        'support.maya.ph',
+        'youtube.com'
+    ];
+
+    const loadingScreen = document.getElementById('loading-screen');
+    const mainContent = document.getElementById('main-content');
+    const infoHost = document.getElementById('info-host');
+    const infoSni = document.getElementById('info-sni');
+    const infoProto = document.getElementById('info-proto');
+    const infoTransport = document.getElementById('info-transport');
+    const configDisplay = document.getElementById('config-display');
+    const copyBtn = document.getElementById('copy-btn');
+    
+    const addressBtn = document.getElementById('address-btn');
+    const addressBtnText = document.getElementById('address-btn-text');
+    const addressSelected = document.getElementById('address-selected');
+    const addressModal = document.getElementById('address-modal');
+    const addressListEl = document.getElementById('address-list');
+    const addressClose = document.getElementById('address-close');
+    
+    const sniBtn = document.getElementById('sni-btn');
+    const sniBtnText = document.getElementById('sni-btn-text');
+    const sniSelected = document.getElementById('sni-selected');
+    const sniModal = document.getElementById('sni-modal');
+    const sniListEl = document.getElementById('sni-list');
+    const sniClose = document.getElementById('sni-close');
+    
+    const protoButtons = document.getElementById('proto-buttons');
+    const transButtons = document.getElementById('trans-buttons');
+    
+    const mainStatusCard = document.getElementById('main-status-card');
+    const mainStatusIcon = document.getElementById('main-status-icon');
+    const mainStatusText = document.getElementById('main-status-text');
+    const mainStatusDesc = document.getElementById('main-status-desc');
+    const userIpEl = document.getElementById('user-ip');
+    const userCountryEl = document.getElementById('user-country');
+    const userCityEl = document.getElementById('user-city');
+    const serverStatusEl = document.getElementById('server-status');
+    const pingValueEl = document.getElementById('ping-value');
+    const serverUptimeEl = document.getElementById('server-uptime');
+    const miniGraphCanvas = document.getElementById('mini-ping-graph');
+    const miniGraphCtx = miniGraphCanvas.getContext('2d');
+    const systemLogArea = document.getElementById('system-log-area');
+    const clearLogBtn = document.getElementById('clear-log');
+
+    let monitorInterval = null;
+    let latencyHistory = [];
+    let serverStartTime = Date.now();
+
+    function addSystemLog(message, type = 'info') {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('tl-PH', { hour12: false });
+        const line = document.createElement('div');
+        line.className = 'log-line';
+        
+        const typeClass = type === 'success' ? 'log-success' : type === 'error' ? 'log-error' : type === 'warning' ? 'log-warning' : 'log-info';
+        line.innerHTML = `<span class="log-time">[${timeStr}]</span> <span class="${typeClass}">${message}</span>`;
+        
+        systemLogArea.appendChild(line);
+        systemLogArea.scrollTop = systemLogArea.scrollHeight;
+    }
+
+    clearLogBtn.addEventListener('click', () => {
+        systemLogArea.innerHTML = '';
+        addSystemLog('Na-clear ang system log', 'info');
+    });
+
+    function buildConfig() {
+        const addr = selectedAddress, sni = selectedSNI, host = currentHost, path = PATHS[selectedProtocol][selectedTransport];
+        let transportParam = '';
+
+        if(selectedTransport === 'ws'){
+            transportParam = `type=ws&path=${encodeURIComponent(path)}&host=${host}`;
+        } else if(selectedTransport === 'httpupgrade'){
+            transportParam = `type=httpupgrade&path=${encodeURIComponent(path)}&host=${host}`;
+        }
+
+        switch(selectedProtocol){
+            case 'vless': 
+                return `vless://${UUID}@${addr}:443?encryption=none&${transportParam}&security=tls&fp=chrome&sni=${sni}#VLESS-${selectedTransport.toUpperCase()}-KEKEVPN`;
+            case 'trojan': 
+                return `trojan://${SS_PASSWORD}@${addr}:443?${transportParam}&security=tls&fp=chrome&sni=${sni}#TROJAN-${selectedTransport.toUpperCase()}-KEKEVPN`;
+            case 'vmess': 
+                return `vmess://${btoa(JSON.stringify({
+                    v: '2',
+                    ps: `VMESS-${selectedTransport.toUpperCase()}-KEKEVPN`,
+                    add: addr,
+                    port: '443',
+                    id: UUID,
+                    aid: '0',
+                    scy: 'auto',
+                    net: selectedTransport,
+                    host: host,
+                    path: path,
+                    tls: 'tls',
+                    sni: sni,
+                    fp: 'chrome',
+                    alpn: 'http/1.1'
+                })).replace(/=+$/,'')}`;
+            case 'shadowsocks': 
+                const ssCred = btoa(`${SS_METHOD}:${SS_PASSWORD}`).replace(/=+$/,'');
+                return `ss://${ssCred}@${addr}:443?${transportParam}&security=tls&sni=${sni}#SS-${selectedTransport.toUpperCase()}-KEKEVPN`;
+        }
+    }
+
+    function buildList(container, items, type) {
+        container.innerHTML = '';
+        items.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'modal-item';
+            el.textContent = item;
+            el.addEventListener('click', () => {
+                if(type === 'address'){ 
+                    selectedAddress = item;
+                    addressBtnText.textContent = item;
+                    addressSelected.textContent = 'Napili: ' + item;
+                    addressModal.classList.remove('show'); 
+                    addSystemLog(`Napiling address: ${item}`, 'success');
+                } else { 
+                    selectedSNI = item;
+                    sniBtnText.textContent = item;
+                    sniSelected.textContent = 'Napili: ' + item;
+                    sniModal.classList.remove('show'); 
+                    addSystemLog(`Napiling SNI: ${item}`, 'success');
+                }
+                updateUI();
+            });
+            container.appendChild(el);
+        });
+    }
+
+    function buildOptions(container, items, sel, lbl, cb, typeKey) {
+        container.innerHTML = '';
+        items.forEach(i => {
+            const b = document.createElement('button');
+            b.className = 'option-btn' + (i === sel ? ' active' : '');
+            b.textContent = lbl[i];
+            b.addEventListener('click', () => {
+                container.querySelectorAll('.option-btn').forEach(x => x.classList.remove('active'));
+                b.classList.add('active');
+                cb(i);
+                updateUI();
+                addSystemLog(`Napiling ${typeKey}: ${lbl[i]}`, 'info');
+            });
+            container.appendChild(b);
+        });
+    }
+
+    function renderMiniGraph() {
+        const w = miniGraphCanvas.width = miniGraphCanvas.offsetWidth * 2;
+        const h = miniGraphCanvas.height = miniGraphCanvas.offsetHeight * 2;
+        miniGraphCtx.scale(2, 2);
+        const cw = w / 2, ch = h / 2;
+        miniGraphCtx.clearRect(0, 0, cw, ch);
+        if(latencyHistory.length < 2) return;
+
+        const maxP = Math.max(...latencyHistory) + 20;
+        const step = cw / (latencyHistory.length - 1);
+
+        const grad = miniGraphCtx.createLinearGradient(0, 0, 0, ch);
+        grad.addColorStop(0, 'rgba(56, 189, 248, 0.25)');
+        grad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+        
+        miniGraphCtx.beginPath();
+        miniGraphCtx.moveTo(0, ch - (latencyHistory[0] / maxP) * ch);
+        latencyHistory.forEach((p, i) => miniGraphCtx.lineTo(i * step, ch - (p / maxP) * ch));
+        miniGraphCtx.lineTo(cw, ch); miniGraphCtx.lineTo(0, ch);
+        miniGraphCtx.fillStyle = grad; miniGraphCtx.fill();
+
+        miniGraphCtx.beginPath();
+        miniGraphCtx.moveTo(0, ch - (latencyHistory[0] / maxP) * ch);
+        latencyHistory.forEach((p, i) => miniGraphCtx.lineTo(i * step, ch - (p / maxP) * ch));
+        miniGraphCtx.strokeStyle = 'var(--accent)';
+        miniGraphCtx.lineWidth = 2; miniGraphCtx.stroke();
+    }
+
+    function updateServerUptime() {
+        const diffMs = Date.now() - serverStartTime;
+        const days = Math.floor(diffMs / 86400000);
+        const hours = Math.floor((diffMs % 86400000) / 3600000);
+        const mins = Math.floor((diffMs % 3600000) / 60000);
+        const secs = Math.floor((diffMs % 60000) / 1000);
+        
+        let uptimeStr = '';
+        if(days > 0) uptimeStr += `${days}d `;
+        if(hours > 0 || days > 0) uptimeStr += `${hours}h `;
+        if(mins > 0 || hours > 0 || days > 0) uptimeStr += `${mins}m `;
+        uptimeStr += `${secs}s`;
+        serverUptimeEl.textContent = uptimeStr;
+    }
+
+    async function fetchUserLocation() {
+        try {
+            addSystemLog('Kinukuha ang iyong lokasyon...', 'info');
+            const res = await fetch('https://ipapi.co/json/');
+            const data = await res.json();
+            userIpEl.textContent = data.ip || 'Hindi makuha';
+            userCountryEl.textContent = data.country_name || 'Hindi makuha';
+            userCityEl.textContent = data.city || 'Hindi makuha';
+            addSystemLog(`Lokasyon nakuha: ${data.city}, ${data.country_name} | IP: ${data.ip}`, 'success');
+        } catch {
+            userIpEl.textContent = 'Hindi makuha';
+            userCountryEl.textContent = 'Hindi makuha';
+            userCityEl.textContent = 'Hindi makuha';
+            addSystemLog('Hindi makuha ang lokasyon at IP', 'error');
+        }
+    }
+
+    async function checkServerStatus() {
+        const t1 = performance.now();
+        const testUrl = `https://${selectedAddress}:443?${Date.now()}`;
+        let isOnline = false;
+        let ping = 999;
+
+        try {
+            const ctrl = new AbortController();
+            const timeout = setTimeout(() => ctrl.abort(), 3000);
+            await fetch(testUrl, { mode: 'no-cors', signal: ctrl.signal });
+            clearTimeout(timeout);
+            ping = Math.round(performance.now() - t1);
+            isOnline = true;
+        } catch {
+            ping = Math.round(performance.now() - t1);
+            isOnline = false;
+        }
+
+        latencyHistory.push(ping);
+        if (latencyHistory.length > 12) latencyHistory.shift();
+        renderMiniGraph();
+
+        if (isOnline) {
+            mainStatusCard.className = 'vpn-status-card connected';
+            mainStatusIcon.className = 'status-indicator connected';
+            mainStatusIcon.textContent = '✓';
+            mainStatusText.textContent = 'CONNECTED';
+            mainStatusDesc.textContent = 'KEKEVPN TUNNEL ACTIVE';
+            serverStatusEl.textContent = 'ONLINE';
+            serverStatusEl.className = 'monitor-item-value success';
+            pingValueEl.textContent = `${ping} ms`;
+            pingValueEl.className = ping < 150 ? 'monitor-item-value success' : ping < 300 ? 'monitor-item-value warning' : 'monitor-item-value error';
+            addSystemLog(`Server Online | Ping: ${ping}ms`, 'success');
+        } else {
+            mainStatusCard.className = 'vpn-status-card disconnected';
+            mainStatusIcon.className = 'status-indicator disconnected';
+            mainStatusIcon.textContent = '✕';
+            mainStatusText.textContent = 'HINDI KAPA NAKA-CONNECT';
+            mainStatusDesc.textContent = 'Pumili ng tamang address o SNI';
+            serverStatusEl.textContent = 'OFFLINE';
+            serverStatusEl.className = 'monitor-item-value error';
+            pingValueEl.textContent = `${ping} ms`;
+            pingValueEl.className = 'monitor-item-value error';
+            addSystemLog(`Server Offline | Ping: ${ping}ms`, 'error');
+        }
+        updateServerUptime();
+    }
+
+    function startMonitor() {
+        if (monitorInterval) clearInterval(monitorInterval);
+        latencyHistory = [];
+        
+        mainStatusCard.className = 'vpn-status-card checking';
+        mainStatusIcon.className = 'status-indicator checking';
+        mainStatusIcon.textContent = '⟳';
+        mainStatusText.textContent = 'SINUSURI ANG SERVER...';
+        mainStatusDesc.textContent = 'Naghihintay ng tugon...';
+        serverStatusEl.textContent = 'SINUSURI';
+        serverStatusEl.className = 'monitor-item-value warning';
+        pingValueEl.textContent = '---';
+        pingValueEl.className = 'monitor-item-value';
+        serverUptimeEl.textContent = 'NAGBUBUO...';
+        
+        addSystemLog('Sinimulan ang server monitoring', 'info');
+        fetchUserLocation();
+        checkServerStatus();
+        monitorInterval = setInterval(checkServerStatus, 5000);
+        setInterval(updateServerUptime, 1000);
+    }
+
+    function updateUI() {
+        infoHost.textContent = selectedAddress;
+        infoSni.textContent = selectedSNI;
+        infoProto.textContent = PROTOCOL_LABELS[selectedProtocol];
+        infoTransport.textContent = TRANSPORT_LABELS[selectedTransport];
+        configDisplay.value = buildConfig();
+        addSystemLog('Na-update ang lahat ng impormasyon at config', 'info');
+        startMonitor();
+    }
+
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            loadingScreen.classList.add('hidden');
+            mainContent.style.display = 'flex';
+           
+            addSystemLog('Na-load nang buo ang KEKEVPN PANEL', 'success');
+            buildList(addressListEl, addressList, 'address');
+            buildList(sniListEl, sniList, 'sni');
+            
+            buildOptions(protoButtons, PROTOCOLS, selectedProtocol, PROTOCOL_LABELS, v => {
+                selectedProtocol = v; 
+                addSystemLog(`Pinalitan ang Protocol: ${PROTOCOL_LABELS[v]}`, 'info');
+            }, 'Protocol');
+
+            buildOptions(transButtons, TRANSPORTS, selectedTransport, TRANSPORT_LABELS, v => {
+                selectedTransport = v; 
+                addSystemLog(`Pinalitan ang Transport: ${TRANSPORT_LABELS[v]}`, 'info');
+            }, 'Transport');
+            
+            addressBtn.addEventListener('click', () => {
+                addressModal.classList.add('show'); 
+                addSystemLog('Binuksan ang Address list', 'info');
+            });
+            addressClose.addEventListener('click', () => addressModal.classList.remove('show'));
+            
+            sniBtn.addEventListener('click', () => {
+                sniModal.classList.add('show'); 
+                addSystemLog('Binuksan ang SNI list', 'info');
+            });
+            sniClose.addEventListener('click', () => sniModal.classList.remove('show'));
+
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(configDisplay.value).then(() => {
+                    copyBtn.textContent = '✓ COPIED!';
+                    addSystemLog('Na-copy ang config sa clipboard', 'success');
+                    setTimeout(() => copyBtn.textContent = 'COPY', 2000);
+                }).catch(() => {
+                    configDisplay.select();
+                    document.execCommand('copy');
+                    copyBtn.textContent = '✓ COPIED!';
+                    addSystemLog('Na-copy ang config sa clipboard (fallback)', 'success');
+                    setTimeout(() => copyBtn.textContent = 'COPY', 2000);
+                });
+            });
+
+            updateUI();
+        }, 1500);
+    });
+})();
+</script>
+</body>
+</html>
