@@ -1,0 +1,82 @@
+{
+  "log": { "loglevel": "warning" },
+  "dns": {
+    "servers": ["8.8.8.8", "8.8.4.4", "1.1.1.1", "1.0.0.1"]
+  },
+  "inbounds": [
+    { 
+      "port": 10000, 
+      "listen": "127.0.0.1", 
+      "protocol": "trojan", 
+      "tag": "trojan-ws", 
+      "settings": {"clients": [{"password": "kekevpn"}]}, 
+      "streamSettings": {"network": "ws", "security": "none", "wsSettings": {"path": "/kekevpn"}} 
+    },
+    { 
+      "port": 10001, 
+      "listen": "127.0.0.1", 
+      "protocol": "trojan", 
+      "tag": "trojan-httpupgrade", 
+      "settings": {"clients": [{"password": "kekevpn"}]}, 
+      "streamSettings": {"network": "httpupgrade", "security": "none", "httpupgradeSettings": {"path": "/kekevpn-hu"}} 
+    },
+    { 
+      "port": 10003, 
+      "listen": "127.0.0.1", 
+      "protocol": "vmess", 
+      "tag": "vmess-ws", 
+      "settings": {"clients": [{"id": "00000000-0000-0000-0000-kekevpn00000", "alterId": 0}]}, 
+      "streamSettings": {"network": "ws", "security": "none", "wsSettings": {"path": "/vmess-kekevpn"}} 
+    },
+    { 
+      "port": 10004, 
+      "listen": "127.0.0.1", 
+      "protocol": "vmess", 
+      "tag": "vmess-httpupgrade", 
+      "settings": {"clients": [{"id": "00000000-0000-0000-0000-kekevpn00000", "alterId": 0}]}, 
+      "streamSettings": {"network": "httpupgrade", "security": "none", "httpupgradeSettings": {"path": "/vmess-kekevpn-hu"}} 
+    },
+    { 
+      "port": 10006, 
+      "listen": "127.0.0.1", 
+      "protocol": "vless", 
+      "tag": "vless-ws", 
+      "settings": {"clients": [{"id": "00000000-0000-0000-0000-kekevpn00000"}], "decryption": "none"}, 
+      "streamSettings": {"network": "ws", "security": "none", "wsSettings": {"path": "/vless-kekevpn"}} 
+    },
+    { 
+      "port": 10007, 
+      "listen": "127.0.0.1", 
+      "protocol": "vless", 
+      "tag": "vless-httpupgrade", 
+      "settings": {"clients": [{"id": "00000000-0000-0000-0000-kekevpn00000"}], "decryption": "none"}, 
+      "streamSettings": {"network": "httpupgrade", "security": "none", "httpupgradeSettings": {"path": "/vless-kekevpn-hu"}} 
+    },
+    { 
+      "port": 10009, 
+      "listen": "127.0.0.1", 
+      "protocol": "shadowsocks", 
+      "tag": "ss-ws", 
+      "settings": {"method": "aes-256-gcm", "password": "kekevpn"}, 
+      "streamSettings": {"network": "ws", "security": "none", "wsSettings": {"path": "/ss-kekevpn"}} 
+    },
+    { 
+      "port": 10010, 
+      "listen": "127.0.0.1", 
+      "protocol": "shadowsocks", 
+      "tag": "ss-httpupgrade", 
+      "settings": {"method": "aes-256-gcm", "password": "kekevpn"}, 
+      "streamSettings": {"network": "httpupgrade", "security": "none", "httpupgradeSettings": {"path": "/ss-kekevpn-hu"}} 
+    }
+  ],
+  "outbounds": [
+    {"protocol": "freedom", "tag": "direct"},
+    {"protocol": "blackhole", "tag": "block"}
+  ],
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {"type": "field", "inboundTag": ["trojan-ws","trojan-httpupgrade","vmess-ws","vmess-httpupgrade","vless-ws","vless-httpupgrade","ss-ws","ss-httpupgrade"], "outboundTag": "direct"}
+    ]
+  }
+}
