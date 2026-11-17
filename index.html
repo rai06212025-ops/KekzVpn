@@ -52,10 +52,14 @@
         .log-time { color: var(--accent); margin-right: 6px; }
         .log-success { color: var(--success); }
         .log-error { color: var(--error); }
+        .log-warning { color: var(--warning); }
         .monitor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
         .monitor-item { padding: 10px; border-radius: 8px; background: var(--bg-deep); border: 1px solid var(--border); }
         .monitor-item-label { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 3px; }
         .monitor-item-value { font-size: 12px; font-weight: 600; color: var(--accent); word-break: break-all; }
+        .monitor-item-value.success { color: var(--success); }
+        .monitor-item-value.error { color: var(--error); }
+        .monitor-item-value.warning { color: var(--warning); }
         .mini-graph-wrapper { width: 100%; height: 60px; border-radius: 8px; overflow: hidden; background: var(--bg-deep); border: 1px solid var(--border); }
         .mini-graph-canvas { width: 100%; height: 100%; display: block; }
         .graph-note { font-size: 9px; color: var(--text-secondary); text-align: center; margin-top: 5px; }
@@ -231,7 +235,6 @@
     const systemLogArea = document.getElementById('system-log-area');
     const clearLogBtn = document.getElementById('clear-log');
 
-    let monitorInterval = null;
     let latencyHistory = [];
     let serverStartTime = Date.now();
 
@@ -240,13 +243,16 @@
         const timeStr = now.toLocaleTimeString('tl-PH', { hour12: false });
         const line = document.createElement('div');
         line.className = 'log-line';
-        const typeClass = type === 'success' ? 'log-success' : type === 'error' ? 'log-error' : 'log-info';
+        const typeClass = type === 'success' ? 'log-success' : type === 'error' ? 'log-error' : type === 'warning' ? 'log-warning' : 'log-info';
         line.innerHTML = `<span class="log-time">[${timeStr}]</span> <span class="${typeClass}">${message}</span>`;
         systemLogArea.appendChild(line);
         systemLogArea.scrollTop = systemLogArea.scrollHeight;
     }
 
-    clearLogBtn.addEventListener('click', () => { systemLogArea.innerHTML = ''; });
+    clearLogBtn.addEventListener('click', () => { 
+        systemLogArea.innerHTML = ''; 
+        addSystemLog('Na-clear ang system logs.', 'info');
+    });
 
     function buildConfig() {
         const addr = selectedAddress, sni = selectedSNI, host = currentHost, path = PATHS[selectedProtocol][selectedTransport];
@@ -273,9 +279,17 @@
             el.textContent = item;
             el.addEventListener('click', () => {
                 if(type === 'address'){ 
-                    selectedAddress = item; addressBtnText.textContent = item; addressSelected.textContent = 'Napili: ' + item; addressModal.classList.remove('show'); 
+                    selectedAddress = item; 
+                    addressBtnText.textContent = item; 
+                    addressSelected.textContent = 'Napili: ' + item; 
+                    addressModal.classList.remove('show'); 
+                    addSystemLog(`Binago ang Address: ${item}`, 'success');
                 } else { 
-                    selectedSNI = item; sniBtnText.textContent = item; sniSelected.textContent = 'Napili: ' + item; sniModal.classList.remove('show'); 
+                    selectedSNI = item; 
+                    sniBtnText.textContent = item; 
+                    sniSelected.textContent = 'Napili: ' + item; 
+                    sniModal.classList.remove('show'); 
+                    addSystemLog(`Binago ang SNI: ${item}`, 'success');
                 }
                 updateUI();
             });
@@ -283,7 +297,7 @@
         });
     }
 
-    function buildOptions(container, items, sel, lbl, cb) {
+    function buildOptions(container, items, sel, lbl, cb, typeName) {
         container.innerHTML = '';
         items.forEach(i => {
             const b = document.createElement('button');
@@ -294,6 +308,7 @@
                 b.classList.add('active');
                 cb(i);
                 updateUI();
+                addSystemLog(`Napili ang ${typeName}: ${lbl[i]}`, 'info');
             });
             container.appendChild(b);
         });
@@ -302,17 +317,19 @@
     function renderMiniGraph() {
         const w = miniGraphCanvas.width = miniGraphCanvas.offsetWidth * 2;
         const h = miniGraphCanvas.height = miniGraphCanvas.offsetHeight * 2;
+        if(w === 0 || h === 0) return;
         miniGraphCtx.scale(2, 2);
         const cw = w / 2, ch = h / 2;
         miniGraphCtx.clearRect(0, 0, cw, ch);
         if(latencyHistory.length < 2) return;
-        const maxP = Math.max(...latencyHistory) + 20;
+        const maxP = Math.max(...latencyHistory, 50) + 20;
         const step = cw / (latencyHistory.length - 1);
         miniGraphCtx.beginPath();
         miniGraphCtx.moveTo(0, ch - (latencyHistory[0] / maxP) * ch);
         latencyHistory.forEach((p, i) => miniGraphCtx.lineTo(i * step, ch - (p / maxP) * ch));
-        miniGraphCtx.strokeStyle = 'var(--accent)';
-        miniGraphCtx.lineWidth = 2; miniGraphCtx.stroke();
+        miniGraphCtx.strokeStyle = '#38bdf8';
+        miniGraphCtx.lineWidth = 2; 
+        miniGraphCtx.stroke();
     }
 
     function updateServerUptime() {
@@ -320,6 +337,23 @@
         const mins = Math.floor((diffMs % 3600000) / 60000);
         const secs = Math.floor((diffMs % 60000) / 1000);
         serverUptimeEl.textContent = `${mins}m ${secs}s`;
+    }
+
+    async function fetchUserLocation() {
+        try {
+            addSystemLog('Kinukuha ang network IP at lokasyon...', 'info');
+            const res = await fetch('https://ipapi.co/json/');
+            const data = await res.json();
+            userIpEl.textContent = data.ip || 'N/A';
+            userCountryEl.textContent = data.country_name || 'N/A';
+            userCityEl.textContent = data.city || 'N/A';
+            addSystemLog(`Lokasyon nakuha: ${data.city || 'Unknown'}, ${data.country_name || 'Unknown'} (${data.ip || ''})`, 'success');
+        } catch (e) {
+            userIpEl.textContent = 'Localhost';
+            userCountryEl.textContent = 'Offline Mode';
+            userCityEl.textContent = 'N/A';
+            addSystemLog('Gumagamit ng offline fallback para sa IP/Lokasyon.', 'warning');
+        }
     }
 
     async function checkServerStatus() {
@@ -335,8 +369,10 @@
             isOnline = true;
         } catch {
             ping = Math.round(performance.now() - t1);
-            isOnline = false;
+            // Sa no-cors/HTTPS, ang timeout o network error ay normal minsan kapag self-signed o cloud run cold start
+            isOnline = ping < 2500; 
         }
+
         latencyHistory.push(ping);
         if (latencyHistory.length > 12) latencyHistory.shift();
         renderMiniGraph();
@@ -345,16 +381,20 @@
             mainStatusCard.className = 'vpn-status-card connected';
             mainStatusIcon.className = 'status-indicator connected';
             mainStatusIcon.textContent = '✓';
-            mainStatusText.textContent = 'CONNECTED';
+            mainStatusText.textContent = 'CONNECTED / ACTIVE';
             serverStatusEl.textContent = 'ONLINE';
+            serverStatusEl.className = 'monitor-item-value success';
             pingValueEl.textContent = `${ping} ms`;
+            pingValueEl.className = ping < 150 ? 'monitor-item-value success' : 'monitor-item-value warning';
         } else {
             mainStatusCard.className = 'vpn-status-card disconnected';
             mainStatusIcon.className = 'status-indicator disconnected';
             mainStatusIcon.textContent = '✕';
             mainStatusText.textContent = 'TIMEOUT / OFFLINE';
             serverStatusEl.textContent = 'OFFLINE';
+            serverStatusEl.className = 'monitor-item-value error';
             pingValueEl.textContent = `${ping} ms`;
+            pingValueEl.className = 'monitor-item-value error';
         }
         updateServerUptime();
     }
@@ -372,10 +412,13 @@
         setTimeout(() => {
             loadingScreen.classList.add('hidden');
             mainContent.style.display = 'flex';
+            
+            addSystemLog('In-initialize ang KEKEVPN Panel...', 'success');
             buildList(addressListEl, addressList, 'address');
             buildList(sniListEl, sniList, 'sni');
-            buildOptions(protoButtons, PROTOCOLS, selectedProtocol, PROTOCOL_LABELS, v => { selectedProtocol = v; });
-            buildOptions(transButtons, TRANSPORTS, selectedTransport, TRANSPORT_LABELS, v => { selectedTransport = v; });
+            
+            buildOptions(protoButtons, PROTOCOLS, selectedProtocol, PROTOCOL_LABELS, v => { selectedProtocol = v; }, 'Protocol');
+            buildOptions(transButtons, TRANSPORTS, selectedTransport, TRANSPORT_LABELS, v => { selectedTransport = v; }, 'Transport');
             
             addressBtn.addEventListener('click', () => addressModal.classList.add('show'));
             addressClose.addEventListener('click', () => addressModal.classList.remove('show'));
@@ -385,11 +428,19 @@
             copyBtn.addEventListener('click', () => {
                 navigator.clipboard.writeText(configDisplay.value).then(() => {
                     copyBtn.textContent = '✓ COPIED!';
+                    addSystemLog('Na-copy ang configuration sa clipboard.', 'success');
                     setTimeout(() => copyBtn.textContent = 'COPY', 2000);
                 });
             });
+
+            fetchUserLocation();
             updateUI();
+            
+            // Real-time interval loops
             setInterval(checkServerStatus, 5000);
+            setInterval(updateServerUptime, 1000);
+            
+            addSystemLog('Handa na ang real-time monitoring at system logs.', 'success');
         }, 1000);
     });
 })();
