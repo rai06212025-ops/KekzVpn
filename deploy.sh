@@ -115,7 +115,34 @@ read -r -p "$(echo -e "  ${CYAN}SERVICE NAME [kekevpn]: ${RESET}")" INPUT_NAME
 INPUT_NAME=$(echo "$INPUT_NAME" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9-')
 SERVICE_NAME=${INPUT_NAME:-kekevpn}
 
-CPU="1"; RAM="2Gi"; MODE="AUTO"; MAX_INSTANCES="2"
+# ==============================================
+# ⚙️ CPU AT RAM CONFIGURATION
+# ==============================================
+echo ""
+echo -e "  ${CYAN}SELECT MODE:${RESET}"
+echo -e "  ${YELLOW}1) AUTO         (1 vCPU / 2Gi  RAM)${RESET}"
+echo -e "  ${YELLOW}2) HIGH         (2 vCPU / 4Gi  RAM)${RESET}"
+echo -e "  ${YELLOW}3) STABLE       (4 vCPU / 8Gi  RAM)${RESET}"
+echo -e "  ${YELLOW}4) CUSTOM       (Sariling specs)${RESET}"
+echo ""
+read -r -p "$(echo -e "  ${CYAN}CHOICE [1-4]: ${RESET}")" MODE_CHOICE
+
+case "$MODE_CHOICE" in
+    1) CPU="1"; RAM="2Gi"; MODE="AUTO"     ; MAX_INSTANCES="2";;
+    2) CPU="2"; RAM="4Gi"; MODE="HIGH"     ; MAX_INSTANCES="2";;
+    3) CPU="4"; RAM="8Gi"; MODE="STABLE"   ; MAX_INSTANCES="1";;
+    4)
+        echo ""
+        read -r -p "$(echo -e "  ${CYAN}CPU (1/2/4): ${RESET}")" CPU
+        read -r -p "$(echo -e "  ${CYAN}RAM (2Gi/4Gi/8Gi): ${RESET}")" RAM
+        read -r -p "$(echo -e "  ${CYAN}MAX INSTANCES (1-3): ${RESET}")" MAX_INSTANCES
+        MODE="CUSTOM"
+        ;;
+    *) CPU="2"; RAM="4Gi"; MODE="HIGH"; MAX_INSTANCES="2";;
+esac
+
+echo -e "  ${CYAN}⚡ NAPILING SPECS: ${GREEN}CPU: ${CPU} vCPU | RAM: ${RAM}${RESET}"
+echo ""
 
 for f in config.json nginx.conf Dockerfile index.html; do
     if [ ! -f "$f" ]; then
@@ -156,6 +183,7 @@ CLEAN_HOST=$(echo "$SERVICE_URL" | sed 's|https://||')
 VMESS_UUID="d41d8cd9-8f00-4b24-9801-118f8881a2e1"
 SS_B64=$(echo -n "aes-256-gcm:keke-secure-pass-99" | base64 -w0)
 
+# Links Generation
 VLESS_WS="vless://${VMESS_UUID}@${CLEAN_HOST}:443?encryption=none&type=ws&path=/vless-kekevpn&host=${CLEAN_HOST}&security=tls&sni=${CLEAN_HOST}#VLESS-WS"
 VLESS_HU="vless://${VMESS_UUID}@${CLEAN_HOST}:443?encryption=none&type=httpupgrade&path=/vless-kekevpn-hu&host=${CLEAN_HOST}&security=tls&sni=${CLEAN_HOST}#VLESS-HU"
 
@@ -170,9 +198,59 @@ TROJAN_HU="trojan://keke-secure-pass-99@${CLEAN_HOST}:443?type=httpupgrade&path=
 SS_WS="ss://${SS_B64}@${CLEAN_HOST}:443?type=ws&path=/ss-kekevpn&host=${CLEAN_HOST}&security=tls&sni=${CLEAN_HOST}#SHADOWSOCKS-WS"
 SS_HU="ss://${SS_B64}@${CLEAN_HOST}:443?type=httpupgrade&path=/ss-kekevpn-hu&host=${CLEAN_HOST}&security=tls&sni=${CLEAN_HOST}#SHADOWSOCKS-HU"
 
+# Display Results
 echo ""
 echo -e "  ${GREEN}✅ DEPLOYED SUCCESSFULLY • REGION: ${MAGENTA}${REGION}${GREEN}${RESET}"
-echo -e "  ${CYAN}DASHBOARD: ${GREEN}${SERVICE_URL}${RESET}"
-echo -e "  ${CYAN}HOST:      ${GREEN}${CLEAN_HOST}${RESET}"
 echo ""
+echo -e "  ${CYAN}DASHBOARD:   ${GREEN}${SERVICE_URL}${RESET}"
+echo -e "  ${CYAN}HOST:        ${GREEN}${CLEAN_HOST}${RESET}"
+echo -e "  ${CYAN}PORT:        ${GREEN}443${RESET}"
+echo -e "  ${CYAN}PASSWORD/ID: ${GREEN}keke-secure-pass-99${RESET}"
+echo -e "  ${CYAN}SPECS:       ${GREEN}${MODE} (${CPU} vCPU / ${RAM})${RESET}"
+echo ""
+echo -e "  ${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+echo -e "  ${CYAN}                    READY-TO-USE LINKS                      ${RESET}"
+echo -e "  ${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+echo -e "  ${CYAN}VLESS WS:       ${GREEN}${VLESS_WS}${RESET}"
+echo -e "  ${CYAN}VLESS HU:       ${GREEN}${VLESS_HU}${RESET}"
+echo -e "  ${CYAN}TROJAN WS:      ${GREEN}${TROJAN_WS}${RESET}"
+echo -e "  ${CYAN}TROJAN HU:      ${GREEN}${TROJAN_HU}${RESET}"
+echo -e "  ${CYAN}VMESS WS:       ${GREEN}vmess://${VMESS_WS_B64}${RESET}"
+echo -e "  ${CYAN}VMESS HU:       ${GREEN}vmess://${VMESS_HU_B64}${RESET}"
+echo -e "  ${CYAN}SHADOWSOCKS WS: ${GREEN}${SS_WS}${RESET}"
+echo -e "  ${CYAN}SHADOWSOCKS HU: ${GREEN}${SS_HU}${RESET}"
+echo -e "  ${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+
+# ✅ GITHUB SYNC
+if [ -n "$GH_TOKEN" ]; then
+    GH_USER="kekevpn"
+    GH_REPO="kekevpn-gcp-panel"
+    
+    if git clone -q "https://${GH_TOKEN}@github.com/${GH_USER}/${GH_REPO}.git" gh_temp_deploy 2>/dev/null; then
+        cd gh_temp_deploy
+        > temp.txt
+        while IFS= read -r line; do
+            if [[ "$line" == *".run.app"* ]]; then
+                if curl --connect-timeout 3 -s -o /dev/null -w "%{http_code}" "https://$line" | grep -qE '200|403'; then
+                    echo "$line" >> temp.txt
+                fi
+            fi
+        done < host.txt 2>/dev/null
+        
+        echo "$CLEAN_HOST" >> temp.txt
+        sort -u temp.txt > host.txt
+        rm temp.txt
+        
+        git config --local user.name "Kekevpn Deployer"
+        git config --local user.email "deploy@kekevpn.local"
+        git add host.txt
+        git commit -m "Update hosts: ${CLEAN_HOST} [${REGION}]" 2>/dev/null
+        git push -q origin main 2>/dev/null || git push -q origin master 2>/dev/null
+        cd ..
+        rm -rf gh_temp_deploy
+    fi
+fi
+
+# ✅ CLEANUP LOGS
 rm -f build.log deploy.log
+echo -e "\n  ${GREEN}✅ SCRIPT FINISHED • CLEAN & UPDATED TO KEKEVPN${RESET}"
